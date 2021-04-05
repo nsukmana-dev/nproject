@@ -8,6 +8,8 @@ type Repository interface {
 	Save(user User) (User, error)
 	ValidateEmail(email string) bool
 	FindByEmail(email string) (User, error)
+	FindByID(ID int) (User, error)
+	Update(user User) (User, error)
 }
 
 type repository struct {
@@ -41,6 +43,27 @@ func (r *repository) ValidateEmail(email string) bool {
 func (r *repository) FindByEmail(email string) (User, error) {
 	var user User
 	err := r.db.Where("email = ?", email).Find(&user).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *repository) FindByID(ID int) (User, error) {
+	var user User
+	err := r.db.Where("id = ?", ID).Find(&user).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *repository) Update(user User) (User, error) {
+	err := r.db.Save(&user).Error
 
 	if err != nil {
 		return user, err
