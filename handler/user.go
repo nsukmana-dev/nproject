@@ -3,18 +3,22 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"nproject/auth"
 	"nproject/helper"
 	"nproject/user"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(userService user.Service) *userHandler {
-	return &userHandler{userService}
+func NewUserHandler(userService user.Service, authService auth.Service) *userHandler {
+	return &userHandler{userService, authService}
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
@@ -46,7 +50,15 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	forrmater := user.FormatUser(newUser, "bahsbdgjaksdfa")
+	token, err := h.authService.GenerateToken(newUser.ID)
+
+	if err != nil {
+		response := helper.APIResponse("Register Account Failed", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	forrmater := user.FormatUser(newUser, token)
 
 	response := helper.APIResponse("Account has been registered", http.StatusOK, "success", forrmater)
 	c.JSON(http.StatusOK, response)
@@ -75,7 +87,14 @@ func (h *userHandler) Login(c *gin.Context) {
 		return
 	}
 
-	forrmater := user.FormatUser(loggedinUser, "bahsbdgjaksdfa")
+	token, err := h.authService.GenerateToken(loggedinUser.ID)
+	if err != nil {
+		response := helper.APIResponse("Login Failed", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	forrmater := user.FormatUser(loggedinUser, token)
 
 	response := helper.APIResponse("Loggin Success", http.StatusOK, "success", forrmater)
 	c.JSON(http.StatusOK, response)
@@ -127,13 +146,14 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	userID := 1
-	path := fmt.Sprintf("images/%d-%s", userID, file.Filename)
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
+	path := fmt.Sprintf("images/%d-%s", userID, file.Filename) + "-" + strconv.FormatInt(time.Now().Unix(), 10)
 
 	err = c.SaveUploadedFile(file, path)
 	if err != nil {
 		data := gin.H{"is_uploaded": false}
-		response := helper.APIResponse("File to upload avatar image2", http.StatusBadRequest, "error", data)
+		response := helper.APIResponse("File to upload avatar image", http.StatusBadRequest, "error", data)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -141,7 +161,7 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	_, err = h.userService.SaveAvatar(userID, path)
 	if err != nil {
 		data := gin.H{"is_uploaded": false}
-		response := helper.APIResponse("File to upload avatar image3", http.StatusBadRequest, "error", data)
+		response := helper.APIResponse("File to upload avatar image", http.StatusBadRequest, "error", data)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
