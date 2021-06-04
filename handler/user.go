@@ -141,7 +141,7 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	file, err := c.FormFile("avatar")
 	if err != nil {
 		data := gin.H{"is_uploaded": false}
-		response := helper.APIResponse("File to upload avatar image", http.StatusBadRequest, "error", data)
+		response := helper.APIResponse("Failed to upload avatar image", http.StatusBadRequest, "error", data)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -153,7 +153,7 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	err = c.SaveUploadedFile(file, path)
 	if err != nil {
 		data := gin.H{"is_uploaded": false}
-		response := helper.APIResponse("File to upload avatar image", http.StatusBadRequest, "error", data)
+		response := helper.APIResponse("Failed to upload avatar image", http.StatusBadRequest, "error", data)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -161,7 +161,7 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	_, err = h.userService.SaveAvatar(userID, path)
 	if err != nil {
 		data := gin.H{"is_uploaded": false}
-		response := helper.APIResponse("File to upload avatar image", http.StatusBadRequest, "error", data)
+		response := helper.APIResponse("Failed to upload avatar image", http.StatusBadRequest, "error", data)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
