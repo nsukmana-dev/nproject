@@ -9,15 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type transactionHendler struct {
+type transactionHandler struct {
 	service transaction.Service
 }
 
-func NewTransactionHandler(service transaction.Service) *transactionHendler {
-	return &transactionHendler{service}
+func NewTransactionHandler(service transaction.Service) *transactionHandler {
+	return &transactionHandler{service}
 }
 
-func (h *transactionHendler) GetCampaignTransactions(c *gin.Context) {
+func (h *transactionHandler) GetCampaignTransactions(c *gin.Context) {
 	var input transaction.GetCampaignTransactionInput
 
 	err := c.ShouldBindUri(&input)
@@ -38,5 +38,20 @@ func (h *transactionHendler) GetCampaignTransactions(c *gin.Context) {
 	}
 
 	response := helper.APIResponse("Campaign transaction", http.StatusOK, "success", transaction.FormatCampaignTransactions(transactions))
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *transactionHandler) GetUserTransactions(c *gin.Context) {
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
+
+	transactions, err := h.service.GetTransactionByUserID(userID)
+	if err != nil {
+		response := helper.APIResponse("Failed to get user's transaction", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("User's transaction", http.StatusOK, "success", transaction.FormatUserTransactions(transactions))
 	c.JSON(http.StatusOK, response)
 }
