@@ -7,6 +7,7 @@ import (
 	"nproject/campaign"
 	"nproject/handler"
 	"nproject/helper"
+	"nproject/payment"
 	"nproject/transaction"
 	"nproject/user"
 	"strings"
@@ -29,11 +30,20 @@ func main() {
 	campaignRepository := campaign.NewRepository(db)
 	transactionRepository := transaction.NewRepository(db)
 
+	authService := auth.NewService()
+	paymentService := payment.NewService()
 	userService := user.NewService(userRepository)
 	campaignService := campaign.NewService(campaignRepository)
-	transactionService := transaction.NewService(transactionRepository, campaignRepository)
+	transactionService := transaction.NewService(transactionRepository, campaignRepository, paymentService)
 
-	authService := auth.NewService()
+	// user, _ := userService.GetUserByID(2)
+	// input := transaction.CreateTransactionInput{
+	// 	CampaignID: 1,
+	// 	Amount:     10000000,
+	// 	User:       user,
+	// }
+	// transactionService.CreateTransaction(input)
+
 	userHandler := handler.NewUserHandler(userService, authService)
 	campaignHandler := handler.NewCampaignHandler(campaignService)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
@@ -58,6 +68,7 @@ func main() {
 
 	api.GET("/campaigns/:id/transactions", authMiddleware(authService, userService), transactionHandler.GetCampaignTransactions)
 	api.GET("/transactions", authMiddleware(authService, userService), transactionHandler.GetUserTransactions)
+	api.POST("/transactions", authMiddleware(authService, userService), transactionHandler.CreateTransaction)
 
 	router.Run()
 
