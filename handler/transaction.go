@@ -63,8 +63,7 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 	if err != nil {
 		errors := helper.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
-
-		response := helper.APIResponse("Failed to create transaction2", http.StatusBadRequest, "error", errorMessage)
+		response := helper.APIResponse("Failed to create transaction", http.StatusBadRequest, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
@@ -75,7 +74,11 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 	newTransaction, err := h.service.CreateTransaction(input)
 
 	if err != nil {
+<<<<<<< HEAD
 		response := helper.APIResponse("Failed to create transaction1", http.StatusBadRequest, "error", nil)
+=======
+		response := helper.APIResponse("Failed to create transaction", http.StatusBadRequest, "error", nil)
+>>>>>>> 06ea2fcfadf35e28e4b38b3af492157b21acd0bc
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}

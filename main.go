@@ -43,7 +43,6 @@ func main() {
 
 	router := gin.Default()
 	router.Use(cors.Default())
-
 	router.Static("/images", "./images")
 	router.Static("/campaign-images", "./campaign-images")
 
@@ -114,12 +113,4 @@ func authMiddleware(authService auth.Service, userService user.Service) gin.Hand
 
 		c.Set("currentUser", user)
 	}
-
-}
-
-func Cors(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=ascii")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,access-control-allow-origin, access-control-allow-headers")
-	w.Write([]byte("Hello, World!"))
 }
