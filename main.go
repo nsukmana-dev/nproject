@@ -45,7 +45,7 @@ func main() {
 	campaignHandler := handler.NewCampaignHandler(campaignService)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
-	userWebHandler := webHandler.NewUserHandler()
+	userWebHandler := webHandler.NewUserHandler(userService)
 
 	router := gin.Default()
 	router.Use(cors.Default())
@@ -55,6 +55,17 @@ func main() {
 
 	router.Static("/images", "./images")
 	router.Static("/campaign-images", "./campaign-images")
+	router.Static("/vendor/fontawesome-free/css", "./web/assets/vendor/fontawesome-free/css")
+	router.Static("/css", "./web/assets/css")
+	router.Static("/img", "./web/assets/img")
+	router.Static("/vendor/jquery/", "./web/assets/vendor/jquery")
+	router.Static("/vendor/bootstrap/js", "./web/assets/vendor/bootstrap/js")
+	router.Static("/vendor/jquery-easing", "./web/assets/vendor/jquery-easing")
+	router.Static("/js", "./web/assets/js")
+	router.Static("/vendor/fontawesome-free/webfonts/", "./web/assets/vendor/fontawesome-free/webfonts")
+	router.Static("/vendor/datatables", "./web/assets/vendor/datatables")
+	router.Static("/vendor/chart", "./web/assets/vendor/chart")
+	// router.Static("/js/demo", "./web/assets/js/demo")
 
 	api := router.Group("/api/v1")
 
