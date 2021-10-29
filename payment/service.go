@@ -20,8 +20,8 @@ func NewService() *service {
 
 func (s *service) GetPaymentURL(transaction Transaction, user user.User) (string, error) {
 	midclient := midtrans.NewClient()
-	midclient.ServerKey = "#"
-	midclient.ClientKey = "#"
+	midclient.ServerKey = "SB-Mid-server-7TvgrTn-vuCq8-LUVWYNgizV"
+	midclient.ClientKey = "SB-Mid-client-uBFRifdqSXa3RMYW"
 	midclient.APIEnvType = midtrans.Sandbox
 
 	// var snapGateway midtrans.SnapGateway
