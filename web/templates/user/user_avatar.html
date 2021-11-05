@@ -1,0 +1,17 @@
+{{ define "content" }}
+<h2 class="m-0 font-weight-bold mb-4">Upload avatar</h2> 
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="">
+            <form action="/users/avatar/{{ .ID }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="avatar">Upload avatar</label>
+                    <input name="avatar" type="file" class="form-control-file" id="avatar" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+{{ end }}

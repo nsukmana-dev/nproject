@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"nproject/user"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -109,6 +111,53 @@ func (h *userHandler) Update(c *gin.Context) {
 	if err != nil {
 		kodeErr := strconv.Itoa(http.StatusInternalServerError)
 		nameErr := "Cannot update user"
+		linkErr := "users"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/users")
+}
+
+func (h *userHandler) NewAvatar(c *gin.Context) {
+	idParam := c.Param("id")
+	id, _ := strconv.Atoi(idParam)
+
+	c.HTML(http.StatusOK, "user_avatar.html", gin.H{"ID": id})
+}
+
+func (h *userHandler) CreateAvatar(c *gin.Context) {
+	idParam := c.Param("id")
+	id, _ := strconv.Atoi(idParam)
+
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot get user avatar"
+		linkErr := "users"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	userID := id
+	path := fmt.Sprintf("images/%d-%s-%s", userID, strconv.FormatInt(time.Now().Unix(), 10), file.Filename)
+
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot upload user avatar"
+		linkErr := "users"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	_, err = h.userService.SaveAvatar(userID, path)
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot save user avatar"
 		linkErr := "users"
 		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
 		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
