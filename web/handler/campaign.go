@@ -48,3 +48,53 @@ func (h *campaignHandler) New(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "campaign_new.html", input)
 }
+
+func (h *campaignHandler) Create(c *gin.Context) {
+	var input campaign.FormCreateCampaignInput
+
+	err := c.ShouldBind(&input)
+	if err != nil {
+		users, er := h.userService.GetAllUsers()
+		if er != nil {
+			kodeErr := strconv.Itoa(http.StatusInternalServerError)
+			nameErr := "Cannot get all user"
+			linkErr := "campaigns"
+			errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+			c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+			return
+		}
+		input.Users = users
+		input.Error = err
+		c.HTML(http.StatusOK, "campaign_new.html", input)
+		return
+	}
+	user, err := h.userService.GetUserByID(input.UserID)
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot get user"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	createCampaignInput := campaign.CreateCampaignInput{}
+	createCampaignInput.Name = input.Name
+	createCampaignInput.ShortDescription = input.ShortDescription
+	createCampaignInput.Description = input.Description
+	createCampaignInput.GoalAmount = input.GoalAmount
+	createCampaignInput.Perks = input.Perks
+	createCampaignInput.User = user
+
+	_, err = h.campaignService.CreateCampaign(createCampaignInput)
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot save campaign"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/campaigns")
+}
