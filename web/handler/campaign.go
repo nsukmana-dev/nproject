@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"nproject/campaign"
 	"nproject/user"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -103,4 +105,71 @@ func (h *campaignHandler) NewImage(c *gin.Context) {
 	idParam := c.Param("id")
 	id, _ := strconv.Atoi(idParam)
 	c.HTML(http.StatusOK, "campaign_image.html", gin.H{"ID": id})
+}
+
+func (h *campaignHandler) CreateImage(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot get image"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	idParam := c.Param("id")
+	id, _ := strconv.Atoi(idParam)
+
+	existingCampaign, err := h.campaignService.GetCampaignById(campaign.GetCampaignDetailInput{ID: id})
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot get detail existing campaign"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	userID := existingCampaign.UserID
+
+	path := fmt.Sprintf("campaign-images/%d-%s-%s", userID, strconv.FormatInt(time.Now().Unix(), 10), file.Filename)
+
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot upload campaign image"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	createCampaignImageInput := campaign.CreateCampaignImageInput{}
+	createCampaignImageInput.CampaignID = id
+	createCampaignImageInput.IsPrimary = true
+
+	userCampaign, err := h.userService.GetUserByID(userID)
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot get user campaign"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	createCampaignImageInput.User = userCampaign
+
+	_, err = h.campaignService.SaveCampaignImage(createCampaignImageInput, path)
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot save campaign image"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/campaigns")
 }
