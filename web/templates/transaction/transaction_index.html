@@ -1,0 +1,34 @@
+{{ define "content" }}
+<h2 class="m-0 font-weight-bold mb-4">Data Transactions</h2> 
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table" id="myTable">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Campaign Name</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .transactions }}
+                    <tr>
+                        <td>{{ .Campaign.Name }}</td>
+                        <td>{{ .AmountFormatIDR }}</td>
+                        <td>{{ .Status }}</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready( function () {
+        $('#myTable').DataTable();
+    } );
+</script>
+{{ end }}

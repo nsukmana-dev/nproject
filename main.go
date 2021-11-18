@@ -47,6 +47,7 @@ func main() {
 
 	userWebHandler := webHandler.NewUserHandler(userService)
 	campaignWebHandler := webHandler.NewCampaignHandler(campaignService, userService)
+	transactionWebHandler := webHandler.NewTransactionHandler(transactionService)
 
 	router := gin.Default()
 	router.Use(cors.Default())
@@ -61,7 +62,6 @@ func main() {
 	router.Static("/img", "./web/assets/img")
 	router.Static("/vendor/jquery/", "./web/assets/vendor/jquery")
 	router.Static("/vendor/bootstrap/js", "./web/assets/vendor/bootstrap/js")
-	router.Static("/vendor/jquery-easing", "./web/assets/vendor/jquery-easing")
 	router.Static("/js", "./web/assets/js")
 	router.Static("/vendor/fontawesome-free/webfonts/", "./web/assets/vendor/fontawesome-free/webfonts")
 	router.Static("/vendor/datatables", "./web/assets/vendor/datatables")
@@ -104,6 +104,8 @@ func main() {
 	router.GET("/campaigns/edit/:id", campaignWebHandler.Edit)
 	router.POST("/campaigns/update/:id", campaignWebHandler.Update)
 	router.GET("/campaigns/show/:id", campaignWebHandler.Show)
+
+	router.GET("/transaction", transactionWebHandler.Index)
 
 	router.Run()
 	// router.Run(":8081") //ganti port
