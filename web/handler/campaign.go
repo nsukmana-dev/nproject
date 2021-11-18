@@ -198,3 +198,55 @@ func (h *campaignHandler) Edit(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "campaign_edit.html", input)
 }
+
+func (h *campaignHandler) Update(c *gin.Context) {
+	idParam := c.Param("id")
+	id, _ := strconv.Atoi(idParam)
+
+	var input campaign.FormUpdateCampaignInput
+	err := c.ShouldBind(&input)
+	if err != nil {
+		input.Error = err
+		input.ID = id
+
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot bind campaign"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	existingCampaign, err := h.campaignService.GetCampaignById(campaign.GetCampaignDetailInput{ID: id})
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot get detail existing campaign"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	userID := existingCampaign.UserID
+
+	userCampaign, err := h.userService.GetUserByID(userID)
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot get user campaign"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	updateInput := campaign.CreateCampaignInput{}
+	updateInput.Name = input.Name
+	updateInput.ShortDescription = input.ShortDescription
+	updateInput.Description = input.Description
+	updateInput.GoalAmount = input.GoalAmount
+	updateInput.Perks = input.Perks
+	updateInput.User = userCampaign
+
+	_, err = h.campaignService.UpdateCampaign(campaign.GetCampaignDetailInput{ID: id}, updateInput)
+	c.Redirect(http.StatusFound, "/campaigns")
+}
