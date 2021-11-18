@@ -250,3 +250,20 @@ func (h *campaignHandler) Update(c *gin.Context) {
 	_, err = h.campaignService.UpdateCampaign(campaign.GetCampaignDetailInput{ID: id}, updateInput)
 	c.Redirect(http.StatusFound, "/campaigns")
 }
+
+func (h *campaignHandler) Show(c *gin.Context) {
+	idParam := c.Param("id")
+	id, _ := strconv.Atoi(idParam)
+
+	existingCampaign, err := h.campaignService.GetCampaignById(campaign.GetCampaignDetailInput{ID: id})
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot get detail existing campaign"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	c.HTML(http.StatusOK, "campaign_show.html", existingCampaign)
+}
