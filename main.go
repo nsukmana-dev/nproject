@@ -116,6 +116,7 @@ func main() {
 
 	router.GET("/login", sessionWebHandler.New)
 	router.POST("/session", sessionWebHandler.Create)
+	router.GET("/logout", sessionWebHandler.Destroy)
 
 	router.Run()
 	// router.Run(":8081") //ganti port
