@@ -173,3 +173,28 @@ func (h *campaignHandler) CreateImage(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, "/campaigns")
 }
+
+func (h *campaignHandler) Edit(c *gin.Context) {
+	idParam := c.Param("id")
+	id, _ := strconv.Atoi(idParam)
+
+	existingCampaign, err := h.campaignService.GetCampaignById(campaign.GetCampaignDetailInput{ID: id})
+	if err != nil {
+		kodeErr := strconv.Itoa(http.StatusInternalServerError)
+		nameErr := "Cannot get detail existing campaign"
+		linkErr := "campaigns"
+		errorStatus := ErrorData(kodeErr, nameErr, linkErr)
+		c.HTML(http.StatusInternalServerError, "error.html", errorStatus)
+		return
+	}
+
+	input := campaign.FormUpdateCampaignInput{}
+	input.ID = existingCampaign.ID
+	input.Name = existingCampaign.Name
+	input.ShortDescription = existingCampaign.ShortDescription
+	input.Description = existingCampaign.ShortDescription
+	input.GoalAmount = existingCampaign.GoalAmount
+	input.Perks = existingCampaign.Perks
+
+	c.HTML(http.StatusOK, "campaign_edit.html", input)
+}
