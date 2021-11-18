@@ -115,6 +115,7 @@ func main() {
 	router.GET("/transaction", authAdminMiddleware(), transactionWebHandler.Index)
 
 	router.GET("/login", sessionWebHandler.New)
+	router.POST("/session", sessionWebHandler.Create)
 
 	router.Run()
 	// router.Run(":8081") //ganti port
